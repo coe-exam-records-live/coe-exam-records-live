@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Google Lens Result</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: rgba(0, 0, 0, 0.85);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .bottom-sheet {
+            background-color: #202124;
+            width: 100%;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 10px 24px 30px 24px;
+            position: absolute;
+            bottom: 0;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform: translateY(0);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            touch-action: none;
+        }
+
+        .bottom-sheet.collapsed {
+            transform: translateY(calc(100% - 60px));
+        }
+
+        .drag-area {
+            width: 100%;
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .drag-handle {
+            width: 40px;
+            height: 4px;
+            background-color: #5f6368;
+            border-radius: 2px;
+            opacity: 0.8;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #bdc1c6;
+            font-size: 14px;
+            font-weight: 500;
+            user-select: none;
+            opacity: 0;
+        }
+
+        .result-preview {
+            background-color: #303134;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .line {
+            line-height: 1.4;
+            color: #e8eaed;
+            font-weight: 400;
+            white-space: nowrap; 
+            width: 100%;
+            overflow: hidden;
+        }
+
+        @media (max-width: 600px) {
+            .line {
+                font-size: 14px;
+            }
+        }
+
+        @media (min-width: 601px) {
+            .line {
+                font-size: 15px;
+            }
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            border: 1px solid #5f6368;
+            color: #8ab4f8;
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: none;
+        }
+
+        .btn-copy svg {
+            fill: #8ab4f8;
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-copy.active-click {
+            background-color: #424C56 !important;
+            border-color: #424C56 !important;
+            color: #a8c7fa !important;
+        }
+        .btn-copy.active-click svg {
+            fill: #a8c7fa !important;
+        }
+
+        @media (min-width: 768px) {
+            body { align-items: center; }
+            .bottom-sheet {
+                position: relative;
+                max-width: 450px;
+                border-radius: 24px;
+                transform: none !important;
+                bottom: auto;
+            }
+            .bottom-sheet.collapsed { transform: none; }
+            .drag-area { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bottom-sheet" id="sheet">
+        
+        <div class="drag-area">
+            <div class="drag-handle"></div>
+        </div>
+
+        <div class="header">
+            <span>Text found in image</span>
+        </div>
+
+        <div class="result-preview">
+            
+            <div class="line">
+                Report Card Serial Number :
+            </div>
+
+            <div class="line">
+                25004612X01457 Student Name : SANTANU
+            </div>
+
+            <div class="line">
+                PRAMANIK Roll Number : 220411110892
+            </div>
+
+            <div class="line">
+                SEM I: Result Code:Q, SGPA(All courses): 5.36
+            </div>
+
+            <div class="line">
+                SEM II: Result Code:Q, SGPA(All courses):
+            </div>
+
+        </div>
+
+        <div class="actions">
+            <button class="btn-copy" id="copyBtn" onclick="handleCopy()">
+                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                Copy text
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const fullResultData = `Report Card Serial Number : 25004612X01457
+Student Name : SANTANU PRAMANIK
+Roll Number : 220411110892
+SEM I: Result Code:Q, SGPA(All courses): 5.36
+SEM II: Result Code:Q, SGPA(All courses): 6.00
+SEM III: Result Code:Q, SGPA(All courses): 5.90
+SEM IV: Result Code:Q, SGPA(All courses): 5.70
+SEM V: Result Code:Q, SGPA(All courses): 5.10
+SEM VI: Result Code:Q, SGPA(All courses): 5.30
+CGPA (All Courses): 5.56
+Final Result Code: Q
+Letter Grade: B`;
+
+        function handleCopy() {
+            navigator.clipboard.writeText(fullResultData).catch(err => console.error(err));
+            const btn = document.getElementById('copyBtn');
+            btn.classList.add('active-click');
+            setTimeout(() => {
+                btn.classList.remove('active-click');
+            }, 250);
+        }
+
+        const sheet = document.getElementById('sheet');
+        let startY = 0;
+        let isDragging = false;
+
+        sheet.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        });
+
+        sheet.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            const endY = e.changedTouches[0].clientY;
+            const diff = endY - startY;
+
+            if (diff > 50) {
+                sheet.classList.add('collapsed');
+            } else if (diff < -50) {
+                sheet.classList.remove('collapsed');
+            }
+            isDragging = false;
+        });
+    </script>
+</body>
+</html>
